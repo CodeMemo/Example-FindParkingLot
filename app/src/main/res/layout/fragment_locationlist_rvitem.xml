@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="2dp"
+        card_view:cardElevation="2dp"
+        card_view:cardUseCompatPadding="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/rvitem_ConstraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteY="81dp">
+
+            <TextView
+                android:id="@+id/textView_vhName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="Name"
+                app:layout_constraintEnd_toEndOf="@+id/rvitem_ConstraintLayout"
+                app:layout_constraintTop_toTopOf="@+id/rvitem_ConstraintLayout" />
+
+            <TextView
+                android:id="@+id/textView_vhArea"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="Area"
+                app:layout_constraintStart_toStartOf="@+id/rvitem_ConstraintLayout"
+                app:layout_constraintTop_toTopOf="@+id/rvitem_ConstraintLayout" />
+
+
+            <TextView
+                android:id="@+id/textView_vhServiceTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="ServiceTime"
+                app:layout_constraintBottom_toTopOf="@+id/textView_vhAddress"
+                app:layout_constraintStart_toStartOf="@+id/rvitem_ConstraintLayout"
+                app:layout_constraintTop_toBottomOf="@+id/textView_vhArea" />
+
+            <TextView
+                android:id="@+id/textView_vhAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="Address"
+                app:layout_constraintBottom_toBottomOf="@+id/rvitem_ConstraintLayout"
+                app:layout_constraintStart_toStartOf="@+id/rvitem_ConstraintLayout" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+
+</FrameLayout>
