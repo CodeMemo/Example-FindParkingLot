@@ -4,6 +4,10 @@ Datasource:
 
 http://data.gov.tw/node/26653
 
+Requirement:
+
+newer than Android 4.4(Kit Kat)
+
 Description:
 
 Retrive parking lots in New Taipei city
