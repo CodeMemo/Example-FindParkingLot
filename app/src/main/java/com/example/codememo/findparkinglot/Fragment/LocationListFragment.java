@@ -35,10 +35,18 @@ public class LocationListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,@Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_locationlist, container, false);
-        if(getArguments().getSerializable("LocationList") != null) {
-            locationList.clear();
-            locationList.addAll((ArrayList<NewTaipeiPublicParkingLotPositionPO>) getArguments().getSerializable("LocationList"));
-            getArguments().remove("LocationList");
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getSerializable("LocationList") != null) {
+                locationList.clear();
+                locationList.addAll((ArrayList<NewTaipeiPublicParkingLotPositionPO>) savedInstanceState.getSerializable("LocationList"));
+                savedInstanceState.remove("LocationList");
+            }
+        }else {
+            if (getArguments().getSerializable("LocationList") != null) {
+                locationList.clear();
+                locationList.addAll((ArrayList<NewTaipeiPublicParkingLotPositionPO>) getArguments().getSerializable("LocationList"));
+                getArguments().remove("LocationList");
+            }
         }
 
         findViews(view);
@@ -61,6 +69,12 @@ public class LocationListFragment extends Fragment {
     private void findViews(View view) {
         locationListswipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.locationListSwipeRefreshLayout);
         locationListRecyclerView = (RecyclerView)view.findViewById(R.id.locationListRecycleView);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable("LocationList",(ArrayList<NewTaipeiPublicParkingLotPositionPO>)locationList);
+        super.onSaveInstanceState(outState);
     }
 
     public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapter.ViewHolder> {

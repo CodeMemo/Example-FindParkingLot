@@ -24,6 +24,11 @@ public class MainActivityPresenter {
         mainView.setDefaultFragment();
     }
 
+    public void createLocationList()
+    {
+        mainView.setLocationList();
+    }
+
     public void refreshRecycleViewData()
     {
         mainModel.setRecycleViewData();

@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 
 import com.example.codememo.findparkinglot.Fragment.LocationListFragment;
 import com.example.codememo.findparkinglot.Fragment.MapFragment;
-import com.example.codememo.findparkinglot.database.AppDatabase;
 import com.example.codememo.findparkinglot.model.MainActivityModel;
 import com.example.codememo.findparkinglot.other.Common;
 import com.example.codememo.findparkinglot.po.NewTaipeiPublicParkingLotPositionPO;
@@ -36,12 +34,25 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         super.onCreate(savedInstanceState);
         Common.mainPresenter = new MainActivityPresenter(getApplicationContext(),this,new MainActivityModel());
         Common.mainPresenter.onCreate();
+        if(savedInstanceState != null)
+        {
+            locationListFragment = (LocationListFragment)(fragmentManager.getFragment(savedInstanceState, "LocationList"));
+        }else
+        {
+            Common.mainPresenter.createLocationList();
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         askPermissions();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        fragmentManager.putFragment(outState, "LocationList", locationListFragment);
+        super.onSaveInstanceState(outState);
     }
 
     private void askPermissions() {
@@ -101,6 +112,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         Bundle bundleForMapFragment = new Bundle();
         mapFragment = MapFragment.newInstance(bundleForMapFragment);
 
+    }
+
+    @Override
+    public void setLocationList() {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_main,locationListFragment,"LocationList");
         fragmentTransaction.commit();
