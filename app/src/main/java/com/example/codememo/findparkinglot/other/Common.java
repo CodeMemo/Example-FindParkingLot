@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.example.codememo.findparkinglot.database.AppDatabase;
 import com.example.codememo.findparkinglot.po.NewTaipeiPublicParkingLotPositionPO;
 import com.example.codememo.findparkinglot.presenter.MainActivityPresenter;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,11 @@ public class Common {
     public static NewTaipeiPublicParkingLotPositionPO usingNewTaipeiPublicParkingLotPositionPO;
     public static MainActivityPresenter mainPresenter;
     public static boolean isInRefresh = false;
+    public static LatLng parkLocationLatLng;
+    public static LatLng myLocationLatLng;
+    public static String routePlanJsonStr;
+    public static String routePlanStatus = "idle";
+    public static String googleDirectionAPIKey = "";
 
     public static boolean networkConnected(Activity activity) {
         if(activity != null) {

@@ -133,6 +133,18 @@
             android:layout_weight="80"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-            tools:context=".MapsActivity" />
+            tools:context=".MapsActivity" >
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/floatingActionButtonRoutePlanning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="20dp"
+                android:clickable="true"
+                app:backgroundTint="@android:color/holo_green_dark"
+                app:srcCompat="@drawable/icon_map_navigation" />
+
+        </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

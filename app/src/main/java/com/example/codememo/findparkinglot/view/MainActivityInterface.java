@@ -7,4 +7,5 @@ public interface MainActivityInterface {
     void refreshRecycleView();
     void setSwipeRefreshLayoutStatus(boolean in);
     void showDetailOnMap();
+    void drawRoutePlanOnMap();
 }

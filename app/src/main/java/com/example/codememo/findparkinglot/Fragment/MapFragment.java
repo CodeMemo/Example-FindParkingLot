@@ -3,8 +3,10 @@ package com.example.codememo.findparkinglot.Fragment;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -17,6 +19,8 @@ import android.widget.TextView;
 
 import com.example.codememo.findparkinglot.R;
 import com.example.codememo.findparkinglot.other.Common;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,19 +28,30 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMap.OnMyLocationButtonClickListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private SupportMapFragment mapFragment;
     private GoogleMap googleMap;
+    private FusedLocationProviderClient mFusedLocationClient;
     private TextView tvName;
     private TextView tvArea;
     private TextView tvAdress;
     private TextView tvServiceTime;
-    private LatLng parkLocationLatLng;
+    private FloatingActionButton fAbtRoutePlanning;
     private Marker parkLocationMarker;
+    private Marker myLocationMarker;
 
     public static MapFragment newInstance(Bundle args) {
         MapFragment f = new MapFragment();
@@ -47,7 +62,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,@Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        Bundle tempBundle = getArguments();
 
         findViewsById(view);
 
@@ -69,7 +83,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
             fm.executePendingTransactions();
         }
         mapFragment.getMapAsync(this);
-
     }
 
     private void setData() {
@@ -77,10 +90,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
         tvArea.setText(Common.usingNewTaipeiPublicParkingLotPositionPO.getAREA());
         tvAdress.setText(Common.usingNewTaipeiPublicParkingLotPositionPO.getADDRESS());
         tvServiceTime.setText(Common.usingNewTaipeiPublicParkingLotPositionPO.getSERVICETIME());
+        fAbtRoutePlanning.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(Common.myLocationLatLng != null) {
+                    Common.mainPresenter.routePlan();
+                }else{
+                    Common.showToast(view.getContext(),"Unknown location");
+                }
+            }
+        });
         double x = Double.parseDouble(Common.usingNewTaipeiPublicParkingLotPositionPO.getTW97X());
         double y = Double.parseDouble(Common.usingNewTaipeiPublicParkingLotPositionPO.getTW97Y());
         double[] latlon =  Twd97ToWgs84(x,y);
-        parkLocationLatLng = new LatLng(latlon[0],latlon[1]);
+        Common.parkLocationLatLng = new LatLng(latlon[0],latlon[1]);
+        Common.myLocationLatLng = null;
     }
 
     private double[] Twd97ToWgs84(double x, double y) {
@@ -140,34 +164,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
         tvArea = view.findViewById(R.id.textView_mapArea);
         tvAdress = view.findViewById(R.id.textView_mapAdress);
         tvServiceTime = view.findViewById(R.id.textView_mapServiceTime);
+        fAbtRoutePlanning = view.findViewById(R.id.floatingActionButtonRoutePlanning);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
+        setFusedLocation();
         setUpMap();
+    }
+
+    private void setFusedLocation() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            googleMap.setMyLocationEnabled(true);
+        } else {
+            Common.showToast(getActivity(),"ACCESS_FINE_LOCATION X");
+        }
+
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                Common.myLocationLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+            }
+        });
     }
 
     private void setUpMap() {
 
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            googleMap.setMyLocationEnabled(true);
+            //googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            //googleMap.setMyLocationEnabled(true);
         } else {
             Common.showToast(getActivity(),"ACCESS_FINE_LOCATION X");
         }
-
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        googleMap.setMyLocationEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setMapToolbarEnabled(false);
-        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-        googleMap.setMyLocationEnabled(true);
-        googleMap.setOnMyLocationButtonClickListener(this);
-
+        //googleMap.setOnMyLocationButtonClickListener(this);
         parkLocationMarker = googleMap.addMarker(new MarkerOptions()
-                                                    .position(parkLocationLatLng)
+                                                    .position(Common.parkLocationLatLng)
                                                 );
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(parkLocationLatLng)
+                .target(Common.parkLocationLatLng)
                 .zoom(18)
                 .build();
         CameraUpdate cameraUpdate = CameraUpdateFactory
@@ -175,8 +216,125 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
         googleMap.moveCamera(cameraUpdate);
     }
 
-    @Override
-    public boolean onMyLocationButtonClick() {
-        return false;
+    public void drawRoutePlanOnMap() {
+        if(Common.routePlanStatus.equals("loading") || Common.routePlanStatus.equals("complete"))
+        {
+            DrawRoutePlanOnMapTask drawRoutePlanOnMapTask = new DrawRoutePlanOnMapTask();
+            drawRoutePlanOnMapTask.execute("");
+        }
     }
+
+    private class DrawRoutePlanOnMapTask extends AsyncTask<String,Integer,List<LatLng>>{
+
+        @Override
+        protected List<LatLng> doInBackground(String... params) {
+            while(Common.routePlanStatus.equals("loading"))
+            {
+                if(Common.routePlanStatus.equals("complete"))
+                {
+                    break;
+                }
+            }
+            List<LatLng> tempPointLatLng = new ArrayList<LatLng>();
+
+            String routePlanJsonStr = Common.routePlanJsonStr;
+            JsonObject inputObject = new Gson().fromJson(routePlanJsonStr, JsonObject.class);
+            String status = inputObject.get("status").getAsString();
+            if(status.equals("OK")){
+                JsonArray routesArray = inputObject.getAsJsonArray("routes");
+                JsonObject routesObject= routesArray.get(0).getAsJsonObject();
+                JsonObject overviewPolylineObject = routesObject.getAsJsonObject("overview_polyline");
+                String pointsStr = overviewPolylineObject.get("points").getAsString();
+                decodeOverviewPolyLinePonts(pointsStr,tempPointLatLng);
+            }
+            return tempPointLatLng;
+        }
+
+        private void decodeOverviewPolyLinePonts(String encoded, List<LatLng> poly) {
+            poly.clear();
+            if (encoded != null && !encoded.isEmpty() && encoded.trim().length() > 0) {
+                int index = 0, len = encoded.length();
+                int lat = 0, lng = 0;
+
+                while (index < len) {
+                    int b, shift = 0, result = 0;
+                    do {
+                        b = encoded.charAt(index++) - 63;
+                        result |= (b & 0x1f) << shift;
+                        shift += 5;
+                    } while (b >= 0x20);
+                    int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                    lat += dlat;
+
+                    shift = 0;
+                    result = 0;
+                    do {
+                        b = encoded.charAt(index++) - 63;
+                        result |= (b & 0x1f) << shift;
+                        shift += 5;
+                    } while (b >= 0x20);
+                    int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                    lng += dlng;
+
+                    LatLng p = new LatLng((((double) lat / 1E5)),
+                            (((double) lng / 1E5)));
+                    poly.add(p);
+                }
+            }
+        }
+
+        @Override
+        public void onPostExecute(List<LatLng> pointLatLng)
+        {
+            super.onPreExecute();
+            if (pointLatLng != null && pointLatLng.size() > 1) {
+                googleMap.clear();
+                PolylineOptions lineOptions = new PolylineOptions();
+                lineOptions.addAll(pointLatLng);
+                lineOptions.width(5);
+                lineOptions.color(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+                googleMap.addPolyline(lineOptions);
+                myLocationMarker = googleMap.addMarker(new MarkerOptions()
+                        .position(Common.myLocationLatLng)
+                );
+
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(parkLocationMarker.getPosition());
+                builder.include(myLocationMarker.getPosition());
+                LatLngBounds bounds = builder.build();
+
+                int padding = 50; // offset from edges of the map in pixels
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+
+                googleMap.animateCamera(cu);
+            }
+            parkLocationMarker = googleMap.addMarker(new MarkerOptions()
+                    .position(Common.parkLocationLatLng)
+            );
+            Common.routePlanJsonStr = "";
+            Common.routePlanStatus = "idle";
+        }
+    }
+
+//    @Override
+//    public boolean onMyLocationButtonClick() {
+//        if(mLastLocation != null)
+//        {
+//            myLocationLatLng = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+//            myLocationMarker = googleMap.addMarker(new MarkerOptions()
+//                    .position(myLocationLatLng)
+//            );
+//
+//            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+//            builder.include(parkLocationMarker.getPosition());
+//            builder.include(myLocationMarker.getPosition());
+//            LatLngBounds bounds = builder.build();
+//
+//            int padding = 50; // offset from edges of the map in pixels
+//            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+//
+//            googleMap.animateCamera(cu);
+//        }
+//        return false;
+//    }
 }

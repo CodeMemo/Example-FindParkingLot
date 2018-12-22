@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Common.googleDirectionAPIKey = getString(R.string.GoogleDirectionAPIKey);
         Common.mainPresenter = new MainActivityPresenter(getApplicationContext(),this,new MainActivityModel());
         Common.mainPresenter.onCreate();
         if(savedInstanceState != null)
@@ -107,11 +108,20 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
         Bundle bundleForLocationListFragment = new Bundle();
         bundleForLocationListFragment.putSerializable("LocationList",(ArrayList<NewTaipeiPublicParkingLotPositionPO>)Common.listNewTaipeiPublicParkingLotPositionPO);
-        locationListFragment = LocationListFragment.newInstance(bundleForLocationListFragment);
-
+        locationListFragment = (LocationListFragment)fragmentManager.findFragmentByTag("LocationList");
+        if(locationListFragment == null) {
+            locationListFragment = LocationListFragment.newInstance(bundleForLocationListFragment);
+        }
+        else{
+            locationListFragment.setArguments(bundleForLocationListFragment);
+        }
         Bundle bundleForMapFragment = new Bundle();
-        mapFragment = MapFragment.newInstance(bundleForMapFragment);
-
+        mapFragment = (MapFragment)fragmentManager.findFragmentByTag("Map");
+        if(mapFragment == null){
+            mapFragment = MapFragment.newInstance(bundleForMapFragment);
+        }else{
+            mapFragment.setArguments(bundleForMapFragment);
+        }
     }
 
     @Override
@@ -148,5 +158,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         fragmentTransaction.replace(R.id.fragment_main,mapFragment,"Map");
         fragmentTransaction.addToBackStack("LocationList");
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public void drawRoutePlanOnMap() {
+        if(mapFragment != null && mapFragment.isVisible()){
+            mapFragment.drawRoutePlanOnMap();
+        }
     }
 }

@@ -3,10 +3,12 @@ package com.example.codememo.findparkinglot.model;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 
+import com.example.codememo.findparkinglot.asynctask.GetRoutePlanTask;
 import com.example.codememo.findparkinglot.asynctask.RetrieveNewTaipeiPublicParkingLotPositionTask;
 import com.example.codememo.findparkinglot.database.AppDatabase;
 import com.example.codememo.findparkinglot.other.Common;
 import com.example.codememo.findparkinglot.po.NewTaipeiPublicParkingLotPositionPO;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,5 +78,24 @@ public class MainActivityModel{
         {
             Common.listNewTaipeiPublicParkingLotPositionPO.add(Common.aryNewTaipeiPublicParkingLotPositionPO[i]);
         }
+    }
+
+    public void setRoutePlanData(){
+        GetRoutePlanTask getRoutePlanTask = new GetRoutePlanTask();
+        String urlForGoogleMapsDirectionsAPI = getUrlForGoogleMapsDirectionsAPI(Common.myLocationLatLng,Common.parkLocationLatLng);
+        if((!urlForGoogleMapsDirectionsAPI.equals("")) && Common.routePlanStatus.equals("idle")) {
+            getRoutePlanTask.execute(urlForGoogleMapsDirectionsAPI);
+        }
+    }
+
+    private String getUrlForGoogleMapsDirectionsAPI(LatLng myLocationLatLng, LatLng parkLocationLatLng) {
+        String url = "";
+        if(myLocationLatLng != null && parkLocationLatLng != null){
+            String originStr = myLocationLatLng.latitude + "," + myLocationLatLng.longitude;
+            String destinationStr = parkLocationLatLng.latitude + "," + parkLocationLatLng.longitude;
+            String outputType = "json";
+            url = "https://maps.googleapis.com/maps/api/directions/"+ outputType +"?origin="+ originStr + "&destination="+ destinationStr + "&key=" + Common.googleDirectionAPIKey;
+        }
+        return url;
     }
 }

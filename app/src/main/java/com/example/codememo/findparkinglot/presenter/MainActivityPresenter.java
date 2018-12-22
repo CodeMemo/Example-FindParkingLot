@@ -16,21 +16,18 @@ public class MainActivityPresenter {
         this.mainModel = mainModel;
     }
 
-    public void onCreate()
-    {
+    public void onCreate(){
         mainModel.getData(mContext);
         mainModel.setRecycleViewData();
         mainView.setContentView();
         mainView.setDefaultFragment();
     }
 
-    public void createLocationList()
-    {
+    public void createLocationList() {
         mainView.setLocationList();
     }
 
-    public void refreshRecycleViewData()
-    {
+    public void refreshRecycleViewData() {
         mainModel.setRecycleViewData();
         while (Common.isInRefresh){
             refreshRecycleView();
@@ -38,19 +35,21 @@ public class MainActivityPresenter {
         }
     }
 
-    public void refreshRecycleView()
-    {
+    public void refreshRecycleView() {
         mainView.refreshRecycleView();
     }
 
-    public void setSwipeRefreshLayoutStatus(boolean in)
-    {
+    public void setSwipeRefreshLayoutStatus(boolean in) {
         mainView.setSwipeRefreshLayoutStatus(in);
     }
 
-    public void showDetailOnMap()
-    {
+    public void showDetailOnMap() {
         mainView.showDetailOnMap();
+    }
+
+    public void routePlan(){
+        mainModel.setRoutePlanData();
+        mainView.drawRoutePlanOnMap();
     }
 
 
