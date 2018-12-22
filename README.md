@@ -1,6 +1,6 @@
 # Example-FindParkingLot
 
-## Datasource:
+## Datasource
 
 http://data.gov.tw/node/26653
 
@@ -20,7 +20,7 @@ https://developers.google.com/maps/documentation/directions/intro
 
 * There is no Directions API for Android 
 
-## Requirement:
+## Requirement
 
 1.newer than Android 4.4(Kit Kat)
 
@@ -37,7 +37,7 @@ ex:
 
 ```
 
-## Description:
+## Description
 
 Retrive parking lots in New Taipei city
 
@@ -53,6 +53,6 @@ Retrive parking lots in New Taipei city
 
 * Need GPS opened
 
-## Preview:
+## Preview
 
 ![pic](https://github.com/CodeMemo/Example-FindParkingLot/blob/master/image/test.gif)
